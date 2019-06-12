@@ -1,0 +1,34 @@
+package kg.adam.lib.resolvers
+
+import com.coxautodev.graphql.tools.GraphQLMutationResolver
+import com.coxautodev.graphql.tools.GraphQLQueryResolver
+import kg.adam.lib.entity.Snack
+import kg.adam.lib.repository.SnackRepository
+import org.springframework.stereotype.Component
+import java.time.temporal.TemporalAmount
+import java.util.*
+
+@Component
+class SnackMutationsResolver (private val snackRepository: SnackRepository) : GraphQLMutationResolver {
+
+    fun newSnack(name: String, amount: Float): Snack {
+        val snack = Snack(name, amount)
+        snack.id = UUID.randomUUID().toString()
+        snackRepository.save(snack)
+        return snack
+    }
+
+    fun deleteSnack(id: String): Boolean {
+        snackRepository.deleteById(id)
+        return true
+    }
+
+    fun updateSnack(id: String, amount: Float): Snack {
+        val snack = snackRepository.findById(id)
+        snack.ifPresent {
+            it.amount = amount
+            snackRepository.save(it)
+        }
+        return snack.get()
+    }
+}
